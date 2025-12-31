@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gedicht voor Anna - Kerst 2024</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #182842 0%, #1a2f4d 100%);
+            color: #b8d4f1;
+            font-family: 'Lora', serif;
+            line-height: 1.8;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Sneeuwvlokken decoratie */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: #fff;
+            font-size: 1em;
+            opacity: 0.8;
+            pointer-events: none;
+            animation: fall linear infinite;
+            z-index: 1;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        /* Kerst ornamenten */
+        .ornament {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(24, 40, 66, 0.7);
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.5),
+                inset 0 0 0 2px rgba(232, 184, 125, 0.2);
+            position: relative;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 25px;
+            }
+        }
+        
+        /* Kerstster decoratie bovenaan */
+        .star-decoration {
+            text-align: center;
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(36px, 8vw, 56px);
+            text-align: center;
+            color: #e8b87d;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 12px rgba(232, 184, 125, 0.6);
+            letter-spacing: 1px;
+            font-weight: 400;
+        }
+        
+        .poem {
+            font-size: clamp(16px, 3vw, 20px);
+            line-height: 1.9;
+            margin-bottom: 40px;
+        }
+        
+        .poem-line {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            text-indent: -20px;
+        }
+        
+        /* Couplet scheiding */
+        .poem-line:nth-child(2n) {
+            margin-bottom: 25px;
+        }
+        
+        .signature {
+            text-align: right;
+            font-style: italic;
+            font-size: clamp(18px, 3.5vw, 22px);
+            color: #e8b87d;
+            margin-top: 40px;
+            font-weight: 600;
+        }
+        
+        /* Terug knop */
+        .back-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #e8b87d 0%, #f5d9a8 100%);
+            color: #182842;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: clamp(14px, 3vw, 16px);
+            font-weight: 700;
+            box-shadow: 0 6px 16px rgba(232, 184, 125, 0.4);
+            transition: all 0.2s ease;
+            margin-top: 30px;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(232, 184, 125, 0.5);
+        }
+        
+        .button-container {
+            text-align: center;
+        }
+        
+        /* Holly decoratie */
+        .holly {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 24px;
+        }
+        
+        /* Geometrische sneeuwvlokken */
+        .geometric-snowflake {
+            position: fixed;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 1;
+            animation: rotate-slow 20s linear infinite;
+        }
+        
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decoratieve sneeuwvlokken -->
+    <script>
+        // Type 1: Klassiek sneeuwkristal met takken (zoals de blauwe in de afbeelding)
+        function createSnowflakeType1(size, color, x, y) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', size);
+            svg.setAttribute('height', size);
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.classList.add('geometric-snowflake');
+            svg.style.left = x + '%';
+            svg.style.top = y + '%';
+            svg.style.width = size + 'px';
+            svg.style.height = size + 'px';
+            
+            const center = 50;
+            const numArms = 6;
+            
+            for (let i = 0; i < numArms; i++) {
+                const angle = (i * 360 / numArms) * Math.PI / 180;
+                
+                // Hoofd arm
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', center);
+                line.setAttribute('y1', center);
+                line.setAttribute('x2', center + Math.cos(angle) * 42);
+                line.setAttribute('y2', center + Math.sin(angle) * 42);
+                line.setAttribute('stroke', color);
+                line.setAttribute('stroke-width', '2.5');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+                
+                // Meerdere zijtakjes
+                for (let j = 1; j <= 3; j++) {
+                    const dist = 15 * j;
+                    const startX = center + Math.cos(angle) * dist;
+                    const startY = center + Math.sin(angle) * dist;
+                    
+                    // V-vorm takjes
+                    [-30, 30].forEach(offset => {
+                        const sideAngle = angle + (offset * Math.PI / 180);
+                        const side = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        side.setAttribute('x1', startX);
+                        side.setAttribute('y1', startY);
+                        side.setAttribute('x2', startX + Math.cos(sideAngle) * 8);
+                        side.setAttribute('y2', startY + Math.sin(sideAngle) * 8);
+                        side.setAttribute('stroke', color);
+                        side.setAttribute('stroke-width', '2');
+                        side.setAttribute('stroke-linecap', 'round');
+                        svg.appendChild(side);
+                    });
+                }
+            }
+            
+            // Centrum cirkel
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', center);
+            circle.setAttribute('cy', center);
+            circle.setAttribute('r', '5');
+            circle.setAttribute('fill', color);
+            svg.appendChild(circle);
+            
+            return svg;
+        }
+        
+        // Type 2: Zon-achtige vorm met veel stralen (zoals de oranje zon)
+        function createSnowflakeType2(size, color, x, y) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', size);
+            svg.setAttribute('height', size);
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.classList.add('geometric-snowflake');
+            svg.style.left = x + '%';
+            svg.style.top = y + '%';
+            svg.style.width = size + 'px';
+            svg.style.height = size + 'px';
+            
+            const center = 50;
+            const numRays = 16;
+            
+            for (let i = 0; i < numRays; i++) {
+                const angle = (i * 360 / numRays) * Math.PI / 180;
+                const length = (i % 2 === 0) ? 40 : 30;
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', center);
+                line.setAttribute('y1', center);
+                line.setAttribute('x2', center + Math.cos(angle) * length);
+                line.setAttribute('y2', center + Math.sin(angle) * length);
+                line.setAttribute('stroke', color);
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+            }
+            
+            // Centrum cirkel
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', center);
+            circle.setAttribute('cy', center);
+            circle.setAttribute('r', '8');
+            circle.setAttribute('fill', color);
+            svg.appendChild(circle);
+            
+            return svg;
+        }
+        
+        // Type 3: Organische vorm met gebogen armen (zoals rechts onder oranje)
+        function createSnowflakeType3(size, color, x, y) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', size);
+            svg.setAttribute('height', size);
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.classList.add('geometric-snowflake');
+            svg.style.left = x + '%';
+            svg.style.top = y + '%';
+            svg.style.width = size + 'px';
+            svg.style.height = size + 'px';
+            
+            const center = 50;
+            const numArms = 8;
+            
+            for (let i = 0; i < numArms; i++) {
+                const angle = (i * 360 / numArms) * Math.PI / 180;
+                
+                // Gebogen armen met path
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const endX = center + Math.cos(angle) * 40;
+                const endY = center + Math.sin(angle) * 40;
+                const controlX = center + Math.cos(angle - 0.3) * 25;
+                const controlY = center + Math.sin(angle - 0.3) * 25;
+                
+                path.setAttribute('d', `M ${center} ${center} Q ${controlX} ${controlY} ${endX} ${endY}`);
+                path.setAttribute('stroke', color);
+                path.setAttribute('stroke-width', '2.5');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(path);
+            }
+            
+            // Centrum
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', center);
+            circle.setAttribute('cy', center);
+            circle.setAttribute('r', '6');
+            circle.setAttribute('fill', color);
+            svg.appendChild(circle);
+            
+            return svg;
+        }
+        
+        // Type 4: Simpele ster vorm (zoals links boven oranje)
+        function createSnowflakeType4(size, color, x, y) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', size);
+            svg.setAttribute('height', size);
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.classList.add('geometric-snowflake');
+            svg.style.left = x + '%';
+            svg.style.top = y + '%';
+            svg.style.width = size + 'px';
+            svg.style.height = size + 'px';
+            
+            const center = 50;
+            const numPoints = 8;
+            
+            for (let i = 0; i < numPoints; i++) {
+                const angle = (i * 360 / numPoints) * Math.PI / 180;
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', center);
+                line.setAttribute('y1', center);
+                line.setAttribute('x2', center + Math.cos(angle) * 45);
+                line.setAttribute('y2', center + Math.sin(angle) * 45);
+                line.setAttribute('stroke', color);
+                line.setAttribute('stroke-width', '1.5');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+            }
+            
+            return svg;
+        }
+        
+        // Genereer mix van geometrische sneeuwvlokken
+        const snowflakeColors = ['#a8c5e2', '#d4e4f7', '#89b3d9', '#f5a962', '#e8b87d', '#ffd4a3'];
+        const types = [createSnowflakeType1, createSnowflakeType2, createSnowflakeType3, createSnowflakeType4];
+        
+        for (let i = 0; i < 18; i++) {
+            const typeFunc = types[Math.floor(Math.random() * types.length)];
+            const size = 50 + Math.random() * 70;
+            const color = snowflakeColors[Math.floor(Math.random() * snowflakeColors.length)];
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            const snowflake = typeFunc(size, color, x, y);
+            document.body.appendChild(snowflake);
+        }
+        
+        // Genereer kleine sneeuwvlok emoji (vallend)
+        const snowColors = ['#a8c5e2', '#d4e4f7', '#89b3d9', '#f5a962', '#e8b87d', '#ffd4a3'];
+        for (let i = 0; i < 30; i++) {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.textContent = ['❄', '❅', '❆'][Math.floor(Math.random() * 3)];
+            snowflake.style.left = Math.random() * 100 + '%';
+            snowflake.style.color = snowColors[Math.floor(Math.random() * snowColors.length)];
+            snowflake.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            snowflake.style.animationDelay = Math.random() * 5 + 's';
+            snowflake.style.fontSize = (Math.random() * 0.8 + 0.5) + 'em';
+            document.body.appendChild(snowflake);
+        }
+        
+        // Genereer decoratieve sneeuwvlok ornamenten
+        const ornamentColors = ['#e8b87d', '#f5d9a8', '#a8c5e2', '#d4e4f7', '#89b3d9', '#ffd4a3'];
+        for (let i = 0; i < 15; i++) {
+            const ornament = document.createElement('div');
+            ornament.className = 'ornament';
+            ornament.style.left = Math.random() * 100 + '%';
+            ornament.style.top = Math.random() * 100 + '%';
+            ornament.style.background = ornamentColors[Math.floor(Math.random() * ornamentColors.length)];
+            ornament.style.width = (Math.random() * 15 + 10) + 'px';
+            ornament.style.height = ornament.style.width;
+            document.body.appendChild(ornament);
+        }
+    </script>
+    
+    <div class="container">
+        <div class="star-decoration">⭐</div>
+        
+        <h1>
+            <span class="holly">🎄</span>
+            Voor Anna
+            <span class="holly">🎄</span>
+        </h1>
+        
+        <div class="poem">
+            <div class="poem-line">Eind Oktober kondigde Lootjestrekken punt NL het vrolijk aan:</div>
+            <div class="poem-line">de Villa Grappa oudejaarsviering is weer van start gegaan</div>
+            
+            <div class="poem-line">De namen in de hoge hoed werden in de trekking verdeeld</div>
+            <div class="poem-line">En de lijstjes met wensen en suggesties doorgespeeld</div>
+            
+            <div class="poem-line">Het "wat" is meestal eenvoudig, de uitdaging zit 'm in het "hoe"</div>
+            <div class="poem-line">Omdat ik liefst ieder jaar iets verrassends doe</div>
+            
+            <div class="poem-line">Aanknopingspunten daarvoor zijn er bij jou volop:</div>
+            <div class="poem-line">Zo ga je het liefst niet in haar eentje naar een shop</div>
+            
+            <div class="poem-line">Ben je voor iedereen meestal heel erg lief</div>
+            <div class="poem-line">En in hart en nieren bijzonder sportief</div>
+            
+            <div class="poem-line">Heb je een snelle Canyon hangen aan de muur</div>
+            <div class="poem-line">Kwam je dit jaar terug van een Bonaire avontuur</div>
+            
+            <div class="poem-line">Liep het ziekenhuis in en uit met je hand, want</div>
+            <div class="poem-line">jouw wijsvinger zat even bekneld in een loopband</div>
+            
+            <div class="poem-line">en je pink is nu met pijn en doorzetting weer recht geveerd</div>
+            <div class="poem-line">Een Flammkuchen maken doe je gepassioneerd</div>
+            
+            <div class="poem-line">Maar het allerleukste dat ik van jou heb geleerd</div>
+            <div class="poem-line">Is hoe je een boekenkast sorteert</div>
+            
+            <div class="poem-line">Daarmee inspireerde je mij tot de verpakking van het gedicht</div>
+            <div class="poem-line">Dat na de oplossing van de puzzel hier voor je ligt</div>
+            
+            <div class="poem-line">Ik wens je vele uurtjes plezier met lezen</div>
+            <div class="poem-line">Hoop dat beide boeken een mooie inspiratie mogen wezen</div>
+        </div>
+        
+        <div class="signature">
+            De Kerstman 🎅
+        </div>
+        
+        <div class="button-container">
+            <a href="index.html" class="back-button">← Terug naar puzzel</a>
+        </div>
+    </div>
+</body>
+</html>
