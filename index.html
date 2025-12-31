@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Anna's Regenboog Rijm - Mobiel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: clamp(20px, 5vw, 36px);
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: clamp(12px, 3vw, 16px);
+            opacity: 0.95;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 600px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: white;
+            color: #764ba2;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: clamp(13px, 3vw, 15px);
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            font-family: 'Quicksand', sans-serif;
+            flex: 1;
+            min-width: 100px;
+            max-width: 150px;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        #resetBtn {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        #checkBtn {
+            background: #51cf66;
+            color: white;
+        }
+        
+        .grid-container {
+            background: white;
+            padding: 12px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+        
+        .chessboard {
+            display: grid;
+            gap: 4px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .chessboard.portrait {
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(16, 1fr);
+        }
+        
+        .chessboard.landscape {
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            aspect-ratio: 1;
+        }
+        
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: clamp(10px, 2.5vw, 13px);
+            font-weight: 600;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            user-select: none;
+            cursor: grab;
+            padding: 8px 4px;
+            text-align: center;
+            line-height: 1.2;
+            position: relative;
+            min-height: 50px;
+            touch-action: none;
+        }
+        
+        /* Visuele scheiding tussen blokken van 8 */
+        /* In portrait mode: elke 2 rijen is een blok */
+        .chessboard.portrait .cell:nth-child(8n+1) {
+            border-top: 3px solid rgba(255,255,255,0.4);
+        }
+        
+        /* In landscape mode: elke rij is een blok */
+        .chessboard.landscape .cell:nth-child(8n+1) {
+            border-top: 3px solid rgba(255,255,255,0.4);
+        }
+        
+        .chessboard.landscape .cell {
+            min-height: 0;
+            aspect-ratio: 1;
+        }
+        
+        .cell:active {
+            cursor: grabbing;
+        }
+        
+        .cell.dragging {
+            opacity: 0.5;
+            z-index: 1000;
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+        
+        .cell.drag-over {
+            border: 3px dashed white;
+            transform: scale(0.95);
+        }
+        
+        /* Ghost element tijdens slepen */
+        .drag-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.8;
+            transform: scale(1.15) rotate(3deg);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+        }
+        
+        /* Regenboog kleuren */
+        .color-red { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+        .color-orange { background: linear-gradient(135deg, #ffa500, #ff8c00); }
+        .color-yellow { background: linear-gradient(135deg, #ffd700, #ffb700); }
+        .color-green { background: linear-gradient(135deg, #51cf66, #37b24d); }
+        .color-blue { background: linear-gradient(135deg, #339af0, #1c7ed6); }
+        .color-indigo { background: linear-gradient(135deg, #5c7cfa, #4c6ef5); }
+        .color-violet { background: linear-gradient(135deg, #9775fa, #845ef7); }
+        .color-pink { background: linear-gradient(135deg, #f783ac, #e64980); }
+        
+        .instruction {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .instruction h2 {
+            color: #764ba2;
+            margin-bottom: 8px;
+            font-size: clamp(16px, 3.5vw, 20px);
+            text-align: center;
+        }
+        
+        .drag-instruction {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: 600;
+            color: #1565c0;
+            font-size: clamp(12px, 2.8vw, 14px);
+        }
+        
+        .rainbow-guide {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .color-label {
+            padding: 5px 6px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: clamp(10px, 2.3vw, 12px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .message {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 12px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .message.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+        
+        .message.success {
+            background: linear-gradient(135deg, #51cf66, #37b24d);
+            color: white;
+        }
+        
+        .message.error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+        
+        .message h2 {
+            font-size: clamp(18px, 4.5vw, 24px);
+            margin-bottom: 6px;
+        }
+        
+        .message p {
+            font-size: clamp(13px, 3.2vw, 16px);
+        }
+        
+        .poem-display {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 15px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+            display: none;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .poem-display.show {
+            display: block;
+            animation: fadeIn 1s ease;
+        }
+        
+        .poem-display h2 {
+            color: #764ba2;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: clamp(20px, 4.5vw, 26px);
+        }
+        
+        .poem-text {
+            color: #333;
+            font-size: clamp(11px, 2.8vw, 15px);
+            line-height: 1.8;
+            text-align: center;
+            word-break: break-word;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f0f;
+            animation: confetti-fall 3s linear;
+            pointer-events: none;
+            z-index: 10000;
+        }
+        
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .balloon {
+            position: fixed;
+            width: 40px;
+            height: 50px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: balloon-float 5s ease-in-out;
+            pointer-events: none;
+            z-index: 9999;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .balloon::before {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            width: 2px;
+            height: 30px;
+            background: rgba(255,255,255,0.5);
+        }
+        
+        .balloon::after {
+            content: '△';
+            position: absolute;
+            bottom: -8px;
+            font-size: 10px;
+            color: inherit;
+            opacity: 0.8;
+        }
+        
+        @keyframes balloon-float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-120vh) rotate(20deg);
+                opacity: 0;
+            }
+        }
+        
+        .star {
+            position: fixed;
+            font-size: 20px;
+            animation: star-sparkle 2s ease-out;
+            pointer-events: none;
+            z-index: 10001;
+        }
+        
+        @keyframes star-sparkle {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .orientation-hint {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: clamp(11px, 2.5vw, 13px);
+            color: #856404;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌈 Anna's Regenboog Rijm 🌈</h1>
+        <p class="subtitle">Sorteer elke groep op kleur - van rood naar roze!</p>
+    </div>
+    
+    <div class="controls">
+        <button id="resetBtn" onclick="resetPuzzle()">🔄 Opnieuw</button>
+        <button id="checkBtn" onclick="checkSolution()">✓ Check</button>
+    </div>
+    
+    <div class="instruction" style="background: #e8f5e9; border: 2px solid #4caf50; padding: 10px 15px;">
+        <div style="text-align: center; font-size: clamp(14px, 3.5vw, 17px); font-weight: 600; color: #2e7d32;">
+            <span id="progressText">📊 Voortgang: 0/8 groepen correct</span>
+        </div>
+    </div>
+    
+    <div class="instruction">
+        <h2>📋 Hoe werkt het?</h2>
+        <div class="drag-instruction">
+            👆 <strong>SLEEP</strong> blokjes naar een andere plek!<br>
+            De puzzel bestaat uit <strong>8 groepen</strong> van 8 blokjes.<br>
+            Binnen elke groep zijn de kleuren door elkaar - sorteer ze op regenboogvolgorde!
+        </div>
+        <div class="rainbow-guide">
+            <span class="color-label" style="background: #ff6b6b;">Rood</span>
+            <span class="color-label" style="background: #ffa500;">Oranje</span>
+            <span class="color-label" style="background: #ffd700;">Geel</span>
+            <span class="color-label" style="background: #51cf66;">Groen</span>
+            <span class="color-label" style="background: #339af0;">Blauw</span>
+            <span class="color-label" style="background: #5c7cfa;">Indigo</span>
+            <span class="color-label" style="background: #9775fa;">Violet</span>
+            <span class="color-label" style="background: #f783ac;">Roze</span>
+        </div>
+    </div>
+    
+    <div class="grid-container">
+        <div class="chessboard portrait" id="chessboard"></div>
+    </div>
+    
+    <div class="message" id="message"></div>
+    
+    <div class="poem-display" id="poemDisplay">
+        <h2>✨ Het Rijm ✨</h2>
+        <div class="poem-text" id="poemText"></div>
+    </div>
+    
+    <script>
+        const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet', 'pink'];
+        const colorNames = ['Rood', 'Oranje', 'Geel', 'Groen', 'Blauw', 'Indigo', 'Violet', 'Roze'];
+        
+        // Functie om HSL naar hex te converteren
+        function hslToHex(h, s, l) {
+            l /= 100;
+            const a = s * Math.min(l, 1 - l) / 100;
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                return Math.round(255 * color).toString(16).padStart(2, '0');
+            };
+            return `#${f(0)}${f(8)}${f(4)}`;
+        }
+        
+        // Genereer 64 woorden met vloeiende regenbooggradiënt
+        let cells = [];
+        for (let i = 0; i < 64; i++) {
+            const hue = (i / 63) * 320; // 0 = rood (0°), 320 = magenta/roze
+            const color = hslToHex(hue, 85, 60);
+            cells.push({
+                id: i,
+                word: `woord${i + 1}`,
+                color: color,
+                hue: hue,
+                correctPosition: i
+            });
+        }
+        
+        let currentOrder = [...cells];
+        let isLandscape = false;
+        
+        // Track welke blokken zijn aangeraakt (waar in gesleept is)
+        let touchedBlocks = new Set(); // Set van block indices (0-7)
+        
+        // Drag & Drop variabelen
+        let draggedElement = null;
+        let draggedIndex = null;
+        let ghostElement = null;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        
+        function shuffleArray(array) {
+            const newArray = [...array];
+            
+            // Shuffle binnen elk blok van 8 tegels
+            for (let blockIndex = 0; blockIndex < 8; blockIndex++) {
+                const startIdx = blockIndex * 8;
+                const endIdx = startIdx + 8;
+                
+                // Shuffle alleen dit blok (Fisher-Yates binnen het blok)
+                for (let i = endIdx - 1; i > startIdx; i--) {
+                    const j = startIdx + Math.floor(Math.random() * (i - startIdx + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+            }
+            
+            return newArray;
+        }
+        
+        function toggleOrientation() {
+            isLandscape = !isLandscape;
+            const board = document.getElementById('chessboard');
+            const btn = document.getElementById('orientationBtn');
+            
+            if (isLandscape) {
+                board.className = 'chessboard landscape';
+                btn.textContent = '📱 8x8';
+            } else {
+                board.className = 'chessboard portrait';
+                btn.textContent = '📱 4x16';
+            }
+            
+            renderBoard();
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        }
+        
+        function renderBoard() {
+            const board = document.getElementById('chessboard');
+            board.innerHTML = '';
+            
+            // Check welke blokken correct zijn
+            const correctBlocks = [];
+            for (let blockIndex = 0; blockIndex < 8; blockIndex++) {
+                let blockCorrect = true;
+                for (let i = 0; i < 8; i++) {
+                    const index = blockIndex * 8 + i;
+                    if (currentOrder[index].correctPosition !== index) {
+                        blockCorrect = false;
+                        break;
+                    }
+                }
+                correctBlocks[blockIndex] = blockCorrect;
+            }
+            
+            currentOrder.forEach((cell, index) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'cell';
+                // cellDiv.textContent = cell.word; // Verwijderd - alleen kleuren tonen
+                cellDiv.dataset.index = index;
+                
+                // Zet achtergrondkleur als gradient
+                const color1 = cell.color;
+                const hue2 = (cell.hue + 10) % 360;
+                const color2 = hslToHex(hue2, 85, 55);
+                cellDiv.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+                
+                // Reset box-shadow (randen van Check knop worden verwijderd bij nieuwe render)
+                cellDiv.style.boxShadow = '0 3px 8px rgba(0,0,0,0.2)';
+                
+                // Als dit het laatste vakje van een correct blok is, toon checkmark
+                const blockIndex = Math.floor(index / 8);
+                const positionInBlock = index % 8;
+                if (positionInBlock === 7 && correctBlocks[blockIndex]) {
+                    const checkmark = document.createElement('span');
+                    checkmark.textContent = '✓';
+                    checkmark.style.cssText = `
+                        font-size: clamp(20px, 5vw, 30px);
+                        font-weight: bold;
+                        color: rgba(255, 255, 255, 0.9);
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                        pointer-events: none;
+                    `;
+                    cellDiv.appendChild(checkmark);
+                }
+                
+                // Touch events voor drag & drop
+                cellDiv.addEventListener('touchstart', handleTouchStart, { passive: false });
+                cellDiv.addEventListener('touchmove', handleTouchMove, { passive: false });
+                cellDiv.addEventListener('touchend', handleTouchEnd, { passive: false });
+                
+                board.appendChild(cellDiv);
+            });
+            
+            // Update voortgang
+            updateProgress();
+        }
+        
+        function updateProgress() {
+            let correctBlocks = 0;
+            
+            // Check elk blok van 8 tegels
+            for (let blockIndex = 0; blockIndex < 8; blockIndex++) {
+                let blockCorrect = true;
+                for (let i = 0; i < 8; i++) {
+                    const index = blockIndex * 8 + i;
+                    if (currentOrder[index].correctPosition !== index) {
+                        blockCorrect = false;
+                        break;
+                    }
+                }
+                if (blockCorrect) correctBlocks++;
+            }
+            
+            const progressText = document.getElementById('progressText');
+            progressText.textContent = `📊 Voortgang: ${correctBlocks}/8 groepen correct`;
+            
+            // Kleur aanpassen op basis van voortgang
+            const parent = progressText.parentElement.parentElement;
+            if (correctBlocks === 8) {
+                parent.style.background = '#c8e6c9';
+                parent.style.borderColor = '#4caf50';
+            } else if (correctBlocks >= 4) {
+                parent.style.background = '#fff9c4';
+                parent.style.borderColor = '#ffc107';
+            } else {
+                parent.style.background = '#e8f5e9';
+                parent.style.borderColor = '#4caf50';
+            }
+        }
+        
+        function handleTouchStart(e) {
+            e.preventDefault();
+            
+            draggedElement = this;
+            draggedIndex = parseInt(this.dataset.index);
+            
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            
+            // Vibratie feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            
+            // Maak ghost element
+            setTimeout(() => {
+                if (draggedElement) {
+                    draggedElement.classList.add('dragging');
+                    createGhostElement(touch.clientX, touch.clientY);
+                }
+            }, 100);
+        }
+        
+        function handleTouchMove(e) {
+            e.preventDefault();
+            
+            if (!draggedElement) return;
+            
+            const touch = e.touches[0];
+            
+            // Update ghost positie
+            if (ghostElement) {
+                ghostElement.style.left = (touch.clientX - ghostElement.offsetWidth / 2) + 'px';
+                ghostElement.style.top = (touch.clientY - ghostElement.offsetHeight / 2) + 'px';
+            }
+            
+            // Vind element onder de vinger
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            // Verwijder alle drag-over classes
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('drag-over');
+            });
+            
+            // Voeg drag-over toe aan element onder vinger
+            if (elementBelow && elementBelow.classList.contains('cell') && elementBelow !== draggedElement) {
+                elementBelow.classList.add('drag-over');
+            }
+        }
+        
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            
+            if (!draggedElement) return;
+            
+            const touch = e.changedTouches[0];
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            // Verwijder ghost
+            if (ghostElement) {
+                ghostElement.remove();
+                ghostElement = null;
+            }
+            
+            // Verwijder dragging class
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+            }
+            
+            // Check of we op een geldig vakje gedropped hebben
+            if (elementBelow && elementBelow.classList.contains('cell') && elementBelow !== draggedElement) {
+                const dropIndex = parseInt(elementBelow.dataset.index);
+                
+                // Wissel de elementen
+                [currentOrder[draggedIndex], currentOrder[dropIndex]] = 
+                [currentOrder[dropIndex], currentOrder[draggedIndex]];
+                
+                // Markeer deze blokken als touched (er is in gewerkt)
+                const draggedBlockIndex = Math.floor(draggedIndex / 8);
+                const droppedBlockIndex = Math.floor(dropIndex / 8);
+                touchedBlocks.add(draggedBlockIndex);
+                touchedBlocks.add(droppedBlockIndex);
+                
+                // Vibratie feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate([30, 30, 30]);
+                }
+                
+                renderBoard();
+            }
+            
+            // Cleanup
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('drag-over');
+            });
+            
+            draggedElement = null;
+            draggedIndex = null;
+        }
+        
+        function createGhostElement(x, y) {
+            ghostElement = document.createElement('div');
+            ghostElement.className = 'drag-ghost';
+            // ghostElement.textContent = currentOrder[draggedIndex].word; // Verwijderd - alleen kleuren
+            ghostElement.style.width = draggedElement.offsetWidth + 'px';
+            ghostElement.style.height = draggedElement.offsetHeight + 'px';
+            ghostElement.style.fontSize = window.getComputedStyle(draggedElement).fontSize;
+            ghostElement.style.left = (x - draggedElement.offsetWidth / 2) + 'px';
+            ghostElement.style.top = (y - draggedElement.offsetHeight / 2) + 'px';
+            
+            // Zet achtergrondkleur
+            const cell = currentOrder[draggedIndex];
+            const color1 = cell.color;
+            const hue2 = (cell.hue + 10) % 360;
+            const color2 = hslToHex(hue2, 85, 55);
+            ghostElement.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+            
+            document.body.appendChild(ghostElement);
+        }
+        
+        function checkSolution() {
+            // Verwijder eerst alle bestaande fout-randen
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.style.border = '';
+                cell.style.boxShadow = '0 3px 8px rgba(0,0,0,0.2)';
+            });
+            
+            const isCorrect = currentOrder.every((cell, index) => {
+                return cell.correctPosition === index;
+            });
+            
+            const messageDiv = document.getElementById('message');
+            
+            if (isCorrect) {
+                messageDiv.className = 'message success show';
+                messageDiv.innerHTML = '<h2>🎉 PERFECT! 🎉</h2><p>Alle kleuren in regenboogvolgorde!<br>Het rijm verschijnt...</p>';
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100, 50, 200]);
+                }
+                
+                setTimeout(() => {
+                    displayPoem();
+                    createConfetti();
+                }, 1500);
+            } else {
+                // Check alleen de blokken waar in gewerkt is
+                let totalIncorrectCells = 0;
+                let incorrectCellsInTouchedBlocks = 0;
+                
+                const cellElements = document.querySelectorAll('.cell');
+                
+                // Loop door alle touched blokken
+                touchedBlocks.forEach(blockIndex => {
+                    // Check elk vakje binnen dit blok
+                    for (let i = 0; i < 8; i++) {
+                        const cellIndex = blockIndex * 8 + i;
+                        const cell = cellElements[cellIndex];
+                        
+                        // Check of dit vakje op de correcte positie staat
+                        if (currentOrder[cellIndex].correctPosition !== cellIndex) {
+                            // Dit vakje staat FOUT - geef het een rode rand
+                            if (cell) {
+                                cell.style.border = '4px solid #ff1744';
+                                cell.style.boxShadow = 'inset 0 0 0 2px #ff1744, 0 0 20px rgba(255,23,68,0.7)';
+                            }
+                            incorrectCellsInTouchedBlocks++;
+                        }
+                        // Anders blijft de cel zonder rode rand (normaal)
+                    }
+                });
+                
+                // Tel totaal aantal foute vakjes (voor het bericht)
+                for (let i = 0; i < 64; i++) {
+                    if (currentOrder[i].correctPosition !== i) {
+                        totalIncorrectCells++;
+                    }
+                }
+                
+                messageDiv.className = 'message error show';
+                if (touchedBlocks.size === 0) {
+                    messageDiv.innerHTML = '<h2>💡 Tip</h2><p>Sleep eerst wat kleuren om te beginnen!</p>';
+                } else if (incorrectCellsInTouchedBlocks === 0) {
+                    messageDiv.innerHTML = '<h2>👍 Goed bezig!</h2><p>De groepen waar je aan gewerkt hebt zijn correct!</p>';
+                } else {
+                    messageDiv.innerHTML = `<h2>😊 Bijna!</h2><p>${incorrectCellsInTouchedBlocks} blokje${incorrectCellsInTouchedBlocks > 1 ? 's' : ''} nog verkeerd (rode rand)</p>`;
+                }
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate(100);
+                }
+                
+                setTimeout(() => {
+                    messageDiv.classList.remove('show');
+                    // Laat de randen staan, verwijder ze niet!
+                }, 3000);
+            }
+        }
+        
+        function displayPoem() {
+            const poemDiv = document.getElementById('poemDisplay');
+            const poemText = document.getElementById('poemText');
+            
+            // Toon een knop naar het gedicht in plaats van het gedicht zelf
+            poemText.innerHTML = `
+                <div style="text-align: center; padding: 30px 20px;">
+                    <h2 style="color: #764ba2; margin-bottom: 20px; font-size: clamp(20px, 5vw, 28px);">
+                        🎉 Gefeliciteerd! 🎉
+                    </h2>
+                    <p style="color: #555; margin-bottom: 30px; font-size: clamp(14px, 3.5vw, 18px);">
+                        Je hebt de puzzel opgelost!
+                    </p>
+                    <a href="gedicht_5.html" style="
+                        display: inline-block;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        padding: 15px 40px;
+                        border-radius: 30px;
+                        text-decoration: none;
+                        font-size: clamp(16px, 4vw, 20px);
+                        font-weight: 700;
+                        box-shadow: 0 8px 20px rgba(118, 75, 162, 0.4);
+                        transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 12px 28px rgba(118, 75, 162, 0.5)';" 
+                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 20px rgba(118, 75, 162, 0.4)';">
+                        🎄 Naar het gedicht 🎄
+                    </a>
+                </div>
+            `;
+            poemDiv.classList.add('show');
+            
+            // Scroll automatisch naar de poem div
+            setTimeout(() => {
+                poemDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+        
+        function createConfetti() {
+            // Confetti - veel meer!
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = -20 + 'px';
+                    
+                    // Varieer grootte
+                    const size = 8 + Math.random() * 12;
+                    confetti.style.width = size + 'px';
+                    confetti.style.height = size + 'px';
+                    
+                    // Random vorm (vierkant, cirkel, rechthoek)
+                    const shapes = ['0%', '50%', '0% 50%'];
+                    confetti.style.borderRadius = shapes[Math.floor(Math.random() * shapes.length)];
+                    
+                    const randomHue = Math.random() * 320;
+                    const randomColor = hslToHex(randomHue, 85, 60);
+                    confetti.style.background = randomColor;
+                    
+                    // Varieer animatie snelheid
+                    const duration = 2 + Math.random() * 2;
+                    confetti.style.animationDuration = duration + 's';
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), duration * 1000 + 500);
+                }, i * 15);
+            }
+            
+            // Ballonnen!
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const balloon = document.createElement('div');
+                    balloon.className = 'balloon';
+                    balloon.style.left = (10 + Math.random() * 80) + '%';
+                    balloon.style.bottom = -60 + 'px';
+                    
+                    // Varieer grootte
+                    const scale = 0.7 + Math.random() * 0.6;
+                    balloon.style.transform = `scale(${scale})`;
+                    
+                    const randomHue = Math.random() * 320;
+                    const balloonColor = hslToHex(randomHue, 85, 65);
+                    balloon.style.background = `linear-gradient(135deg, ${balloonColor}, ${hslToHex((randomHue + 20) % 360, 85, 55)})`;
+                    balloon.style.boxShadow = `inset -10px -10px 20px rgba(0,0,0,0.2), 0 5px 20px rgba(0,0,0,0.3)`;
+                    balloon.style.color = balloonColor;
+                    
+                    // Varieer snelheid
+                    const duration = 4 + Math.random() * 3;
+                    balloon.style.animationDuration = duration + 's';
+                    balloon.style.animationDelay = Math.random() * 1 + 's';
+                    
+                    document.body.appendChild(balloon);
+                    
+                    setTimeout(() => balloon.remove(), duration * 1000 + 1000);
+                }, i * 100);
+            }
+            
+            // Sterren/sparkles
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.textContent = ['✨', '⭐', '🌟', '💫'][Math.floor(Math.random() * 4)];
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = (20 + Math.random() * 60) + '%';
+                    
+                    const duration = 1.5 + Math.random();
+                    star.style.animationDuration = duration + 's';
+                    star.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    document.body.appendChild(star);
+                    
+                    setTimeout(() => star.remove(), duration * 1000);
+                }, i * 50);
+            }
+        }
+        
+        function resetPuzzle() {
+            currentOrder = shuffleArray(cells);
+            touchedBlocks.clear(); // Reset welke blokken zijn aangeraakt
+            renderBoard();
+            
+            const messageDiv = document.getElementById('message');
+            messageDiv.classList.remove('show');
+            
+            const poemDiv = document.getElementById('poemDisplay');
+            poemDiv.classList.remove('show');
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        // Automatische orientatie detectie
+        function checkOrientation() {
+            const isPortrait = window.innerHeight > window.innerWidth;
+            const board = document.getElementById('chessboard');
+            
+            if (isPortrait && isLandscape) {
+                // Telefoon staat -> wissel naar 4x16
+                isLandscape = false;
+                board.className = 'chessboard portrait';
+            } else if (!isPortrait && !isLandscape) {
+                // Telefoon ligt -> wissel naar 8x8
+                isLandscape = true;
+                board.className = 'chessboard landscape';
+            }
+        }
+        
+        // Luister naar orientatie veranderingen
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+        
+        // Voorkom context menu op lang drukken
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // Initialiseer
+        checkOrientation(); // Check orientatie bij opstarten
+        resetPuzzle();
+    </script>
+</body>
+</html>
